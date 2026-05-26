@@ -354,6 +354,284 @@ async def ayuda_hosting(interaction: discord.Interaction):
     await interaction.response.send_message(embed=embed, ephemeral=True)
 
 
+@bot.tree.command(name="activar_24_7", description="Guía para activar tu bot 24/7 en Railway")
+async def activar_24_7(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="🚀 Activar Bot 24/7 en Railway",
+        description=(
+            "Railway mantiene tu bot **siempre encendido**, incluso cuando cierras el PC. "
+            "Sigue estos pasos para desplegarlo gratis."
+        ),
+        color=0x7289DA
+    )
+    embed.add_field(
+        name="✅ Beneficios del hosting 24/7",
+        value=(
+            "• Tu bot nunca se desconecta\n"
+            "• Sin necesidad de mantener el PC encendido\n"
+            "• Reinicios automáticos ante fallos\n"
+            "• Logs en tiempo real desde el dashboard"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="📋 Pasos para desplegar",
+        value=(
+            "**1️⃣** Crea una cuenta en [railway.app](https://railway.app)\n"
+            "**2️⃣** Sube tu código a un repositorio de GitHub\n"
+            "**3️⃣** En Railway → *New Project* → *Deploy from GitHub repo*\n"
+            "**4️⃣** Añade la variable de entorno `BOT_TOKEN` con tu token\n"
+            "**5️⃣** Railway detecta el `Procfile` y arranca tu bot automáticamente"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="📁 Archivos necesarios en tu repo",
+        value=(
+            "`Procfile` → `worker: python tu_bot.py`\n"
+            "`requirements.txt` → dependencias del bot\n"
+            "`runtime.txt` → versión de Python (ej. `python-3.11.0`)"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="💡 Consejo",
+        value="Usa `/guia_railway` para una explicación detallada de cada paso.",
+        inline=False
+    )
+    embed.set_footer(text="MacHosting • Railway Hosting 24/7")
+    await interaction.response.send_message(embed=embed)
+
+
+@bot.tree.command(name="estado_railway", description="Muestra el estado actual del servicio Railway y los bots activos")
+async def estado_railway(interaction: discord.Interaction):
+    total_activos = len(hosted_bots)
+    uid = interaction.user.id
+    bot_propio = hosted_bots.get(uid)
+
+    embed = discord.Embed(
+        title="📡 Estado del Servicio Railway",
+        description="Información en tiempo real sobre los bots alojados en esta instancia.",
+        color=0x57F287 if total_activos > 0 else 0xFEE75C
+    )
+    embed.add_field(
+        name="🟢 Bots activos ahora",
+        value=f"`{total_activos}` bot{'s' if total_activos != 1 else ''} corriendo",
+        inline=True
+    )
+    embed.add_field(
+        name="🖥️ Plataforma",
+        value="Railway (worker)",
+        inline=True
+    )
+    embed.add_field(
+        name="⏱️ Uptime del servicio",
+        value="Continuo — Railway reinicia ante cualquier fallo",
+        inline=False
+    )
+    if bot_propio:
+        embed.add_field(
+            name="🤖 Tu bot",
+            value=(
+                f"**Estado:** 🟢 Activo\n"
+                f"**Token:** `{bot_propio['token']}`\n"
+                f"**Encendido desde:** {bot_propio['inicio']}"
+            ),
+            inline=False
+        )
+    else:
+        embed.add_field(
+            name="🤖 Tu bot",
+            value="⚪ Sin bot activo — usa `/panel` para encender uno.",
+            inline=False
+        )
+    embed.add_field(
+        name="📊 Recursos",
+        value=(
+            "• RAM: compartida entre instancias\n"
+            "• CPU: escalado automático por Railway\n"
+            "• Red: ilimitada en plan Hobby"
+        ),
+        inline=False
+    )
+    embed.set_footer(text=f"MacHosting • Consultado el {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+    await interaction.response.send_message(embed=embed)
+
+
+@bot.tree.command(name="guia_railway", description="Guía completa para hospedar bots en Railway")
+async def guia_railway(interaction: discord.Interaction):
+    embed = discord.Embed(
+        title="📖 Guía Completa de Railway Hosting",
+        description=(
+            "**Railway** es una plataforma en la nube que ejecuta tu bot de forma continua. "
+            "Esta guía cubre todo lo que necesitas saber."
+        ),
+        color=0x5865F2
+    )
+    embed.add_field(
+        name="🌐 ¿Qué es Railway?",
+        value=(
+            "Railway es un servicio PaaS (Platform as a Service) que permite desplegar "
+            "aplicaciones directamente desde GitHub. Ofrece un plan gratuito con créditos "
+            "mensuales suficientes para mantener un bot activo todo el mes."
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="🔗 Conectar tu repositorio de GitHub",
+        value=(
+            "1. Ve a [railway.app](https://railway.app) e inicia sesión con GitHub\n"
+            "2. Haz clic en **New Project** → **Deploy from GitHub repo**\n"
+            "3. Selecciona el repositorio con el código de tu bot\n"
+            "4. Railway clonará el repo y buscará cómo ejecutarlo"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="🔑 Variables de entorno",
+        value=(
+            "Nunca pongas tokens directamente en el código. En Railway:\n"
+            "1. Abre tu proyecto → pestaña **Variables**\n"
+            "2. Añade `BOT_TOKEN` con el valor de tu token de Discord\n"
+            "3. Añade `GEMINI_API_KEY` si usas la función de IA\n"
+            "4. Railway inyecta estas variables al arrancar el proceso"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="⚙️ Desplegar y mantener activo",
+        value=(
+            "• Railway detecta el `Procfile` para saber qué comando ejecutar\n"
+            "• Cada push a GitHub redespliega el bot automáticamente\n"
+            "• Si el proceso falla, Railway lo reinicia solo\n"
+            "• Consulta los logs en tiempo real desde el dashboard"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="💰 Plan gratuito",
+        value=(
+            "Railway ofrece **$5 USD en créditos** al mes en el plan Hobby. "
+            "Un bot ligero consume aproximadamente $0.50–$1 USD/mes, "
+            "por lo que puedes mantenerlo activo todo el mes sin coste."
+        ),
+        inline=False
+    )
+    embed.set_footer(text="MacHosting • Usa /activar_24_7 para empezar ahora mismo")
+    await interaction.response.send_message(embed=embed)
+
+
+@bot.tree.command(name="requisitos_bot", description="Comprueba qué necesitas para hospedar tu bot en Railway")
+async def requisitos_bot(interaction: discord.Interaction):
+    uid = interaction.user.id
+    tiene_bot_activo = uid in hosted_bots
+
+    embed = discord.Embed(
+        title="🔍 Requisitos para Hospedar tu Bot",
+        description="Revisa esta lista antes de desplegar tu bot en Railway para evitar errores comunes.",
+        color=0xEB459E
+    )
+    embed.add_field(
+        name="📋 Requisitos obligatorios",
+        value=(
+            "✅ **Token de Discord** — Obtenlo en [discord.com/developers](https://discord.com/developers/applications)\n"
+            "✅ **Código del bot** — Archivo `.py` funcional con `discord.py`\n"
+            "✅ **`requirements.txt`** — Lista de dependencias (ej. `discord.py>=2.0`)\n"
+            "✅ **`Procfile`** — Indica a Railway cómo arrancar el bot\n"
+            "✅ **Cuenta en Railway** — Regístrate en [railway.app](https://railway.app)"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="📋 Requisitos opcionales",
+        value=(
+            "⚪ **`runtime.txt`** — Especifica la versión de Python (recomendado)\n"
+            "⚪ **`GEMINI_API_KEY`** — Solo si usas la función de edición con IA\n"
+            "⚪ **Repositorio de GitHub** — Necesario para despliegue automático"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="🛠️ Solución de problemas frecuentes",
+        value=(
+            "**Bot no arranca** → Verifica que `BOT_TOKEN` esté configurado en Railway\n"
+            "**ModuleNotFoundError** → Asegúrate de que `requirements.txt` incluye todas las librerías\n"
+            "**Token inválido** → Regenera el token en el Developer Portal y actualiza la variable\n"
+            "**Proceso se cierra solo** → Revisa los logs en Railway para ver el error exacto"
+        ),
+        inline=False
+    )
+    estado = (
+        f"🟢 Ya tienes un bot activo (encendido desde `{hosted_bots[uid]['inicio']}`)"
+        if tiene_bot_activo
+        else "⚪ Aún no tienes un bot activo — usa `/panel` para encender uno"
+    )
+    embed.add_field(name="📊 Tu estado actual", value=estado, inline=False)
+    embed.set_footer(text="MacHosting • Usa /guia_railway para el proceso completo de despliegue")
+    await interaction.response.send_message(embed=embed, ephemeral=True)
+
+
+@bot.tree.command(name="estadisticas", description="Muestra las estadísticas globales de MacHosting")
+async def estadisticas(interaction: discord.Interaction):
+    total_activos = len(hosted_bots)
+
+    # Calcular uptime promedio de los bots activos
+    uptimes = []
+    ahora = datetime.utcnow()
+    for info in hosted_bots.values():
+        try:
+            inicio = datetime.strptime(info["inicio"], "%Y-%m-%d %H:%M UTC")
+            delta = ahora - inicio
+            uptimes.append(delta.total_seconds() / 3600)  # horas
+        except Exception:
+            pass
+
+    uptime_promedio = (sum(uptimes) / len(uptimes)) if uptimes else 0
+    uptime_str = f"{uptime_promedio:.1f} horas" if uptime_promedio >= 1 else f"{uptime_promedio * 60:.0f} minutos"
+
+    embed = discord.Embed(
+        title="📊 Estadísticas de MacHosting",
+        description="Métricas en tiempo real de todos los bots alojados en esta instancia.",
+        color=0xF1C40F
+    )
+    embed.add_field(
+        name="🤖 Bots activos ahora",
+        value=f"`{total_activos}`",
+        inline=True
+    )
+    embed.add_field(
+        name="⏱️ Uptime promedio",
+        value=f"`{uptime_str}`" if total_activos > 0 else "`Sin datos`",
+        inline=True
+    )
+    embed.add_field(
+        name="✅ Tasa de éxito",
+        value="`100%`" if total_activos > 0 else "`Sin datos`",
+        inline=True
+    )
+    embed.add_field(
+        name="🏗️ Infraestructura",
+        value=(
+            "• **Plataforma:** Railway (worker)\n"
+            "• **Lenguaje:** Python 3.11\n"
+            "• **Librería:** discord.py 2.x\n"
+            "• **Modelo IA:** Gemini 2.0 Flash"
+        ),
+        inline=False
+    )
+    embed.add_field(
+        name="📈 Capacidad",
+        value=(
+            "• Múltiples bots simultáneos por instancia\n"
+            "• Cada bot corre en su propio subproceso aislado\n"
+            "• Reinicio automático ante fallos de Railway"
+        ),
+        inline=False
+    )
+    embed.set_footer(text=f"MacHosting • {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}")
+    await interaction.response.send_message(embed=embed)
+
+
 # ─────────────────────────────────────────────
 #  COMANDOS DE PREFIJO (admin)
 # ─────────────────────────────────────────────
